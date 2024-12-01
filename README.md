@@ -13,6 +13,7 @@ Cache support for the app.
         - [Cache Usage](#cache-usage)
         - [Adding and Registering Caches](#adding-and-registering-caches)
     - [Deleting Expired Items](#deleting-expired-items)
+    - [Clearing Cache](#clearing-cache)
 - [Credits](#credits)
 ___
 
@@ -205,7 +206,64 @@ $app->run();
 
 ## Deleting Expired Items
 
-You may delete expired items automatically with the task manager (in development).
+Some PSR 6 cache pools or PSR 16 caches do not include an automated mechanism for pruning expired cache items.
+
+If you have installed the [App Console](https://github.com/tobento-ch/app-console) you may easily delete expired items running the following commands:
+
+**PSR 6**
+
+```
+php ap cache:pool:prune
+```
+
+**PSR 16**
+
+```
+php ap cache:prune
+```
+
+If you would like to automate this process, consider installing the [App Schedule](https://github.com/tobento-ch/app-schedule) bundle and using a command task:
+
+```php
+use Tobento\Service\Schedule\Task;
+use Butschster\CronExpression\Generator;
+
+$schedule->task(
+    (new Task\CommandTask(
+        command: 'cache:pool:prune',
+    ))
+    // schedule task:
+    ->cron(Generator::create()->weekly())
+);
+```
+
+## Clearing Cache
+
+If you have installed the [App Console](https://github.com/tobento-ch/app-console) you may easily clear caches running the following commands:
+
+**PSR 6**
+
+```
+php ap cache:pool:clear
+```
+
+Clearing specific pools only:
+
+```
+php ap cache:pool:clear --pool=file --pool=another
+```
+
+**PSR 16**
+
+```
+php ap cache:clear
+```
+
+Clearing specific pools only:
+
+```
+php ap cache:clear --cache=file --cache=another
+```
 
 # Credits
 
