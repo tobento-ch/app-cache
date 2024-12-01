@@ -13,6 +13,8 @@ declare(strict_types=1);
  
 namespace Tobento\App\Cache\Boot;
 
+use Psr\Cache\CacheItemPoolInterface;
+use Psr\SimpleCache\CacheInterface;
 use Tobento\App\Boot;
 use Tobento\App\Boot\Functions;
 use Tobento\App\Boot\Config;
@@ -25,8 +27,7 @@ use Tobento\Service\Cache\CacheException as ServiceCacheException;
 use Tobento\Service\Cache\Simple\CacheFactoryInterface;
 use Tobento\Service\Cache\Simple\CachesInterface;
 use Tobento\Service\Cache\Simple\Caches;
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\SimpleCache\CacheInterface;
+use Tobento\Service\Console\ConsoleInterface;
 
 /**
  * Cache
@@ -145,6 +146,14 @@ class Cache extends Boot
         // Default PSR-16 CacheInterface:
         $this->app->set(CacheInterface::class, function(): CacheInterface {
             return $this->app->get(CachesInterface::class)->default('primary');
+        });
+        
+        // Console commands:
+        $this->app->on(ConsoleInterface::class, function(ConsoleInterface $console): void {
+            $console->addCommand(\Tobento\App\Cache\Console\CacheClearCommand::class);
+            $console->addCommand(\Tobento\App\Cache\Console\CachePruneCommand::class);
+            $console->addCommand(\Tobento\App\Cache\Console\CachePoolClearCommand::class);
+            $console->addCommand(\Tobento\App\Cache\Console\CachePoolPruneCommand::class);
         });
     }
 }
