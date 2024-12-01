@@ -17,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 use Tobento\App\Cache\Boot\Cache;
 use Tobento\Service\Cache\CacheItemPoolsInterface;
 use Tobento\Service\Cache\Simple\CachesInterface;
+use Tobento\Service\Console\ConsoleInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\SimpleCache\CacheInterface;
 use Tobento\Service\Config\ConfigInterface;
@@ -68,6 +69,20 @@ class CacheTest extends TestCase
         $this->assertInstanceof(CacheInterface::class, $app->get(CacheInterface::class));
     }
     
+    public function testConsoleCommandsAreAvailable()
+    {
+        $app = $this->createApp();
+        $app->boot(Cache::class);
+        $app->boot(\Tobento\App\Console\Boot\Console::class);
+        $app->booting();
+        
+        $console = $app->get(ConsoleInterface::class);
+        $this->assertTrue($console->hasCommand('cache:clear'));
+        $this->assertTrue($console->hasCommand('cache:prune'));
+        $this->assertTrue($console->hasCommand('cache:pool:clear'));
+        $this->assertTrue($console->hasCommand('cache:pool:prune'));
+    }
+    
     public function testDefaultPoolsAndCachesAreAvailable()
     {
         $app = $this->createApp();
@@ -79,7 +94,7 @@ class CacheTest extends TestCase
         
         $this->assertInstanceof(CacheItemPoolInterface::class, $pools->default('primary'));
         $this->assertInstanceof(CacheInterface::class, $caches->default('primary'));
-    }
+    }    
     
     public function testWithClosureConfigStorage()
     {
